@@ -1,6 +1,29 @@
 @import "tailwindcss";
 @import "@heroui/styles";
 
+@theme {
+  --font-display: "Bricolage Grotesque", ui-sans-serif, system-ui, sans-serif;
+  --font-sans: "Hanken Grotesk", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
+}
+
+/* ------------------------------------------------------------------ *
+ * Cinematic "editing suite" theme: warm celluloid gold on deep charcoal.
+ * We override HeroUI's dark-theme tokens so every component (buttons,
+ * chips, alerts, progress) inherits the same gold accent automatically.
+ * ------------------------------------------------------------------ */
+.dark,
+[data-theme="dark"] {
+  --accent: oklch(0.83 0.13 80);
+  --accent-foreground: oklch(0.2 0.02 70);
+  --background: oklch(0.15 0.012 65);
+  --background-secondary: oklch(0.17 0.013 62);
+  --surface: oklch(0.205 0.013 66);
+  --surface-secondary: oklch(0.25 0.013 66);
+  --border: oklch(0.3 0.012 70);
+  --separator: oklch(0.27 0.01 70);
+}
+
 html,
 body,
 #root {
@@ -9,5 +32,225 @@ body,
 
 body {
   margin: 0;
+  font-family: var(--font-sans);
+  background: var(--background);
+  color: var(--foreground);
   -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+/* --- Atmosphere: layered warm glows behind everything --------------- */
+.ambient {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  overflow: hidden;
+}
+.ambient::before,
+.ambient::after {
+  content: "";
+  position: absolute;
+  border-radius: 9999px;
+  filter: blur(90px);
+}
+.ambient::before {
+  width: 46rem;
+  height: 46rem;
+  top: -16rem;
+  left: 50%;
+  transform: translateX(-50%);
+  background: radial-gradient(
+    circle,
+    color-mix(in oklab, var(--accent) 30%, transparent),
+    transparent 68%
+  );
+  opacity: 0.5;
+  animation: drift 16s ease-in-out infinite alternate;
+}
+.ambient::after {
+  width: 32rem;
+  height: 32rem;
+  bottom: -12rem;
+  right: -6rem;
+  background: radial-gradient(
+    circle,
+    color-mix(in oklab, var(--accent) 18%, transparent),
+    transparent 70%
+  );
+  opacity: 0.4;
+  animation: drift 20s ease-in-out infinite alternate-reverse;
+}
+
+@keyframes drift {
+  from {
+    transform: translate(-50%, 0) scale(1);
+  }
+  to {
+    transform: translate(-50%, 2rem) scale(1.08);
+  }
+}
+
+/* --- Film grain overlay -------------------------------------------- */
+.grain {
+  position: fixed;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
+  opacity: 0.05;
+  mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+/* --- Film perforation band (decorative divider / accents) ----------- */
+.film-band {
+  position: relative;
+  height: 18px;
+  border-radius: 5px;
+  overflow: hidden;
+  background: linear-gradient(
+    color-mix(in oklab, var(--accent) 16%, transparent),
+    color-mix(in oklab, var(--accent) 7%, transparent)
+  );
+  border: 1px solid color-mix(in oklab, var(--accent) 18%, transparent);
+}
+.film-band::before,
+.film-band::after {
+  content: "";
+  position: absolute;
+  left: 6px;
+  right: 6px;
+  height: 4px;
+  border-radius: 2px;
+  background-image: repeating-linear-gradient(
+    90deg,
+    color-mix(in oklab, var(--background) 78%, #000) 0 7px,
+    transparent 7px 15px
+  );
+}
+.film-band::before {
+  top: 3px;
+}
+.film-band::after {
+  bottom: 3px;
+}
+
+/* --- Progress styled as a glowing film strip ----------------------- */
+.vc-track {
+  position: relative;
+  height: 16px;
+  border-radius: 9999px;
+  background: color-mix(in oklab, var(--foreground) 8%, transparent);
+  border: 1px solid color-mix(in oklab, var(--foreground) 10%, transparent);
+  overflow: hidden;
+}
+.vc-fill {
+  position: relative;
+  height: 100%;
+  border-radius: 9999px;
+  background: linear-gradient(
+    90deg,
+    color-mix(in oklab, var(--accent) 70%, #000),
+    var(--accent)
+  );
+  box-shadow: 0 0 16px color-mix(in oklab, var(--accent) 55%, transparent);
+  transition: width 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.vc-fill::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    color-mix(in oklab, white 55%, transparent),
+    transparent
+  );
+  background-size: 40% 100%;
+  background-repeat: no-repeat;
+  animation: sheen 1.4s linear infinite;
+}
+@keyframes sheen {
+  from {
+    background-position: -40% 0;
+  }
+  to {
+    background-position: 140% 0;
+  }
+}
+
+/* --- Brand mark glow ----------------------------------------------- */
+.brand-mark {
+  position: relative;
+  box-shadow: 0 0 0 1px color-mix(in oklab, var(--accent) 35%, transparent),
+    0 12px 40px color-mix(in oklab, var(--accent) 30%, transparent);
+}
+.brand-mark::before {
+  content: "";
+  position: absolute;
+  inset: -6px;
+  border-radius: inherit;
+  background: radial-gradient(
+    circle,
+    color-mix(in oklab, var(--accent) 30%, transparent),
+    transparent 70%
+  );
+  filter: blur(10px);
+  z-index: -1;
+}
+
+/* --- Gold glow for the primary action ------------------------------ */
+.btn-glow {
+  box-shadow: 0 10px 34px color-mix(in oklab, var(--accent) 38%, transparent);
+}
+
+/* --- Card edge: thin gold light along the top ---------------------- */
+.vc-card {
+  position: relative;
+  background:
+    linear-gradient(color-mix(in oklab, var(--surface) 100%, transparent), color-mix(in oklab, var(--surface) 100%, transparent));
+  border: 1px solid color-mix(in oklab, var(--foreground) 9%, transparent);
+  box-shadow: 0 30px 80px -30px rgba(0, 0, 0, 0.7);
+}
+.vc-card::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 12%;
+  right: 12%;
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    color-mix(in oklab, var(--accent) 80%, transparent),
+    transparent
+  );
+}
+
+/* --- Entrance animation -------------------------------------------- */
+@keyframes reveal {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+.reveal {
+  opacity: 0;
+  animation: reveal 0.7s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .reveal,
+  .ambient::before,
+  .ambient::after,
+  .vc-fill::after {
+    animation: none;
+  }
+  .reveal {
+    opacity: 1;
+  }
 }

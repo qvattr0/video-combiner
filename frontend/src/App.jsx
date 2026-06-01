@@ -119,167 +119,171 @@ export default function App() {
     }
   }
 
-  const canCombine = folder && folder.count > 0 && status !== STATUS.COMBINING;
+  const isCombining = status === STATUS.COMBINING;
+  const canCombine = folder && folder.count > 0 && !isCombining;
 
   return (
-    <div className="min-h-full bg-gradient-to-b from-background to-background-secondary flex items-center justify-center p-6 text-foreground">
-      <div className="w-full max-w-xl">
-        <header className="flex flex-col items-center text-center gap-3 mb-8">
-          <div className="size-16 rounded-3xl bg-accent-soft text-accent flex items-center justify-center shadow-sm">
-            <Clapperboard className="size-8" strokeWidth={1.75} />
+    <div className="relative min-h-full overflow-hidden flex items-center justify-center p-6">
+      <div className="ambient" aria-hidden="true" />
+      <div className="grain" aria-hidden="true" />
+
+      <main className="relative z-10 w-full max-w-xl">
+        <header
+          className="reveal flex flex-col items-center text-center gap-4 mb-8"
+          style={{ animationDelay: "0.05s" }}
+        >
+          <div className="brand-mark size-[4.5rem] rounded-2xl bg-accent-soft text-accent flex items-center justify-center">
+            <Clapperboard className="size-9" strokeWidth={1.6} />
           </div>
-          <div>
-            <h1 className="text-3xl font-semibold tracking-tight">Video Combiner</h1>
-            <p className="text-muted mt-1">
-              Merge a folder of clips into one video — in one click.
-            </p>
+          <div className="space-y-2">
+            <h1 className="font-display text-[2.75rem] leading-none font-extrabold tracking-tight bg-gradient-to-b from-foreground to-foreground/55 bg-clip-text text-transparent">
+              Video Combiner
+            </h1>
+            <p className="text-muted">Merge a folder of clips into one video.</p>
           </div>
         </header>
 
-        <Card className="shadow-lg">
-          <Card.Content className="flex flex-col gap-6 p-6">
-            {/* Step 1: choose a folder */}
-            <section className="flex flex-col gap-3">
-              <div className="flex items-center gap-2 text-sm font-medium">
-                <span className="size-6 rounded-full bg-surface-secondary flex items-center justify-center text-xs font-semibold">
-                  1
-                </span>
-                Choose a folder of videos
-              </div>
-
+        <Card
+          className="vc-card reveal rounded-2xl overflow-hidden"
+          style={{ animationDelay: "0.18s" }}
+        >
+          <Card.Content className="flex flex-col gap-5 p-7">
+            {/* Primary actions: pick a folder, then combine */}
+            <div className="flex gap-3">
               <Button
                 variant="outline"
                 size="lg"
                 onPress={chooseFolder}
-                isDisabled={status === STATUS.COMBINING || status === STATUS.PICKING}
-                className="justify-start h-auto py-4"
+                isDisabled={isCombining || status === STATUS.PICKING}
+                className="flex-1 justify-start min-w-0"
+                title={folder ? folder.path : undefined}
               >
                 {status === STATUS.PICKING ? (
-                  <Loader2 className="size-5 shrink-0 animate-spin" />
+                  <Loader2 className="size-5 shrink-0 animate-spin text-accent" />
                 ) : (
-                  <FolderOpen className="size-5 shrink-0" />
+                  <FolderOpen className="size-5 shrink-0 text-accent" />
                 )}
-                <span className="flex flex-col items-start text-left">
-                  <span className="font-medium">
-                    {folder ? folder.name : "Select folder…"}
-                  </span>
-                  <span className="text-xs text-muted font-normal truncate max-w-[22rem]">
-                    {folder
-                      ? folder.path
-                      : "Pick the folder that holds your .mp4 clips"}
-                  </span>
+                <span className="truncate font-medium">
+                  {folder ? folder.name : "Select folder"}
                 </span>
               </Button>
 
-              {folder && folder.count > 0 && (
-                <div className="flex items-center gap-2">
-                  <Chip color="success" variant="soft" size="sm">
-                    <Film className="size-3.5" />
-                    <Chip.Label>
-                      {folder.count} video{folder.count === 1 ? "" : "s"} found
-                    </Chip.Label>
-                  </Chip>
-                </div>
-              )}
+              <Button
+                variant="primary"
+                size="lg"
+                onPress={combine}
+                isDisabled={!canCombine}
+                className="btn-glow shrink-0 font-semibold"
+              >
+                {isCombining ? (
+                  <Loader2 className="size-5 animate-spin" />
+                ) : (
+                  <Sparkles className="size-5" />
+                )}
+                {isCombining ? "Combining…" : "Combine videos"}
+              </Button>
+            </div>
 
-              {folder && folder.count === 0 && (
-                <Alert status="warning">
+            {/* Selected-folder summary */}
+            {folder && folder.count > 0 && !isCombining && status !== STATUS.DONE && (
+              <div className="flex items-center gap-3 min-w-0">
+                <Chip color="success" variant="soft" size="sm">
+                  <Film className="size-3.5" />
+                  <Chip.Label className="font-mono tracking-wide">
+                    {folder.count} clip{folder.count === 1 ? "" : "s"}
+                  </Chip.Label>
+                </Chip>
+                <span className="font-mono text-xs text-muted truncate">
+                  {folder.path}
+                </span>
+              </div>
+            )}
+
+            {folder && folder.count === 0 && (
+              <Alert status="warning">
+                <Alert.Indicator>
+                  <AlertTriangle className="size-4" />
+                </Alert.Indicator>
+                <Alert.Content>
+                  <Alert.Title>No videos in this folder</Alert.Title>
+                  <Alert.Description>
+                    Choose a folder that contains .mp4 files.
+                  </Alert.Description>
+                </Alert.Content>
+              </Alert>
+            )}
+
+            {/* Progress while combining */}
+            {isCombining && (
+              <div className="flex flex-col gap-3">
+                <div className="flex items-end justify-between">
+                  <span className="text-sm text-muted">{message || "Working…"}</span>
+                  <span className="font-mono text-2xl font-semibold tabular-nums text-accent leading-none">
+                    {String(Math.round(progress)).padStart(2, "0")}
+                    <span className="text-base text-muted">%</span>
+                  </span>
+                </div>
+                <ProgressBar value={progress} aria-label="Combining progress">
+                  <ProgressBar.Track className="vc-track">
+                    <ProgressBar.Fill className="vc-fill" />
+                  </ProgressBar.Track>
+                </ProgressBar>
+              </div>
+            )}
+
+            {/* Result */}
+            {status === STATUS.DONE && (
+              <div className="flex flex-col gap-4">
+                <Alert status="success">
                   <Alert.Indicator>
-                    <AlertTriangle className="size-4" />
+                    <CheckCircle2 className="size-4" />
                   </Alert.Indicator>
                   <Alert.Content>
-                    <Alert.Title>No videos in this folder</Alert.Title>
-                    <Alert.Description>
-                      Choose a folder that contains .mp4 files.
+                    <Alert.Title>Your video is ready</Alert.Title>
+                    <Alert.Description className="font-mono text-xs break-all">
+                      {outputPath}
                     </Alert.Description>
                   </Alert.Content>
                 </Alert>
-              )}
-            </section>
-
-            <div className="h-px bg-separator" />
-
-            {/* Step 2: combine */}
-            <section className="flex flex-col gap-4">
-              <div className="flex items-center gap-2 text-sm font-medium">
-                <span className="size-6 rounded-full bg-surface-secondary flex items-center justify-center text-xs font-semibold">
-                  2
-                </span>
-                Combine into one video
+                <div className="flex gap-3">
+                  <Button
+                    variant="primary"
+                    size="lg"
+                    onPress={reveal}
+                    className="btn-glow flex-1"
+                  >
+                    <FolderSearch className="size-5" />
+                    Show in Finder
+                  </Button>
+                  <Button variant="outline" size="lg" onPress={resetResult}>
+                    <RotateCcw className="size-5" />
+                    Start over
+                  </Button>
+                </div>
               </div>
+            )}
 
-              {status === STATUS.COMBINING ? (
-                <div className="flex flex-col gap-3">
-                  <ProgressBar value={progress} aria-label="Combining progress" color="accent">
-                    <ProgressBar.Track>
-                      <ProgressBar.Fill />
-                    </ProgressBar.Track>
-                  </ProgressBar>
-                  <div className="flex items-center gap-2 text-sm text-muted">
-                    <Loader2 className="size-4 animate-spin" />
-                    <span>{message || "Working…"}</span>
-                    <span className="ml-auto tabular-nums font-medium text-foreground">
-                      {Math.round(progress)}%
-                    </span>
-                  </div>
-                </div>
-              ) : status === STATUS.DONE ? (
-                <div className="flex flex-col gap-4">
-                  <Alert status="success">
-                    <Alert.Indicator>
-                      <CheckCircle2 className="size-4" />
-                    </Alert.Indicator>
-                    <Alert.Content>
-                      <Alert.Title>Your video is ready</Alert.Title>
-                      <Alert.Description className="break-all">
-                        {outputPath}
-                      </Alert.Description>
-                    </Alert.Content>
-                  </Alert>
-                  <div className="flex gap-3">
-                    <Button variant="primary" size="lg" onPress={reveal} className="flex-1">
-                      <FolderSearch className="size-5" />
-                      Show in Finder
-                    </Button>
-                    <Button variant="outline" size="lg" onPress={resetResult}>
-                      <RotateCcw className="size-5" />
-                      Start over
-                    </Button>
-                  </div>
-                </div>
-              ) : (
-                <Button
-                  variant="primary"
-                  size="lg"
-                  onPress={combine}
-                  isDisabled={!canCombine}
-                  className="h-14 text-base"
-                >
-                  <Sparkles className="size-5" />
-                  Combine videos
-                </Button>
-              )}
-
-              {status === STATUS.ERROR && error && (
-                <Alert status="danger">
-                  <Alert.Indicator>
-                    <AlertTriangle className="size-4" />
-                  </Alert.Indicator>
-                  <Alert.Content>
-                    <Alert.Title>Couldn’t finish</Alert.Title>
-                    <Alert.Description className="break-words">{error}</Alert.Description>
-                  </Alert.Content>
-                </Alert>
-              )}
-            </section>
+            {status === STATUS.ERROR && error && (
+              <Alert status="danger">
+                <Alert.Indicator>
+                  <AlertTriangle className="size-4" />
+                </Alert.Indicator>
+                <Alert.Content>
+                  <Alert.Title>Couldn’t finish</Alert.Title>
+                  <Alert.Description className="break-words">{error}</Alert.Description>
+                </Alert.Content>
+              </Alert>
+            )}
           </Card.Content>
         </Card>
 
-        <p className="text-center text-xs text-muted mt-6">
-          Clips are joined in filename order. The combined file is saved inside the
-          same folder.
+        <p
+          className="reveal text-center text-xs text-muted/70 mt-6"
+          style={{ animationDelay: "0.3s" }}
+        >
+          Clips are joined in filename order and saved beside the originals.
         </p>
-      </div>
+      </main>
     </div>
   );
 }
