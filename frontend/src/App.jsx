@@ -149,7 +149,7 @@ export default function App() {
           className="reveal flex flex-col items-center text-center gap-5 mb-9"
           style={{ animationDelay: "0.05s" }}
         >
-          <div className="size-16 rounded-2xl bg-white/5 backdrop-blur ring-1 ring-accent/25 text-accent flex items-center justify-center shadow-lg">
+          <div className="size-16 rounded-2xl bg-surface/90 backdrop-blur ring-1 ring-accent/30 text-accent flex items-center justify-center shadow-lg">
             <Clapperboard className="size-8" strokeWidth={1.6} />
           </div>
           <div className="space-y-2">
