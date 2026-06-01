@@ -12,8 +12,10 @@
     "@heroui/react": "^3.0.0",
     "@heroui/styles": "^3.0.0",
     "lucide-react": "^0.475.0",
+    "postprocessing": "^6.39.1",
     "react": "^19.0.0",
-    "react-dom": "^19.0.0"
+    "react-dom": "^19.0.0",
+    "three": "^0.184.0"
   },
   "devDependencies": {
     "@tailwindcss/vite": "^4.0.0",

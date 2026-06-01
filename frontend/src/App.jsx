@@ -11,6 +11,10 @@ import {
   Sparkles,
   RotateCcw,
 } from "lucide-react";
+import PixelBlast from "./reactbits/PixelBlast.jsx";
+import GradientText from "./reactbits/GradientText.jsx";
+
+const GRADIENT = ["#6366f1", "#38bdf8", "#a78bfa"];
 
 const STATUS = {
   IDLE: "idle",
@@ -124,27 +128,47 @@ export default function App() {
 
   return (
     <div className="relative min-h-full overflow-hidden flex items-center justify-center p-6">
-      <div className="ambient" aria-hidden="true" />
-      <div className="grain" aria-hidden="true" />
+      <div className="pixelblast-bg" aria-hidden="true">
+        <PixelBlast
+          variant="square"
+          pixelSize={4}
+          color="#818cf8"
+          patternScale={2.4}
+          patternDensity={1.1}
+          enableRipples
+          rippleSpeed={0.4}
+          rippleThickness={0.12}
+          rippleIntensityScale={1.4}
+          edgeFade={0.6}
+          speed={0.6}
+        />
+      </div>
 
       <main className="relative z-10 w-full max-w-xl">
         <header
-          className="reveal flex flex-col items-center text-center gap-4 mb-8"
+          className="reveal flex flex-col items-center text-center gap-5 mb-9"
           style={{ animationDelay: "0.05s" }}
         >
-          <div className="brand-mark size-[4.5rem] rounded-2xl bg-accent-soft text-accent flex items-center justify-center">
-            <Clapperboard className="size-9" strokeWidth={1.6} />
+          <div className="size-16 rounded-2xl bg-white/5 backdrop-blur ring-1 ring-accent/25 text-accent flex items-center justify-center shadow-lg">
+            <Clapperboard className="size-8" strokeWidth={1.6} />
           </div>
           <div className="space-y-2">
-            <h1 className="font-display text-[2.75rem] leading-none font-extrabold tracking-tight bg-gradient-to-b from-foreground to-foreground/55 bg-clip-text text-transparent">
+            <GradientText
+              as="h1"
+              colors={[...GRADIENT, "#38bdf8", "#6366f1"]}
+              animationSpeed={9}
+              className="font-display text-[3rem] leading-[1.05] font-extrabold tracking-tight"
+            >
               Video Combiner
-            </h1>
-            <p className="text-muted">Merge a folder of clips into one video.</p>
+            </GradientText>
+            <p className="text-muted text-lg">
+              Merge a folder of clips into one video.
+            </p>
           </div>
         </header>
 
         <Card
-          className="vc-card reveal rounded-2xl overflow-hidden"
+          className="glass-card reveal rounded-3xl overflow-hidden"
           style={{ animationDelay: "0.18s" }}
         >
           <Card.Content className="flex flex-col gap-5 p-7">
